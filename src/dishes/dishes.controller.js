@@ -81,20 +81,12 @@ function create(req, res, next) {
 
 // Read Single Dishes Handler
 function read(req, res, next) {
-    const { dish } = res.locals;
-    if (!dish) {
-        return next({
-            message: "Dish was not found",
-            status: 404
-        })
-    }
-    res.status(200).json({ data: dish })
+    res.status(200).json({ data: res.locals.dish })
 }
 
 // Update Dishes Handler
 function update(req, res, next) {
     const dishId = res.locals.dish
-    const {dish} = res.locals
     const { data: {id, name, description, price, image_url} = {} } = req.body;
 
     if (id && id !== dishId.id) {
@@ -111,12 +103,12 @@ function update(req, res, next) {
         })
     }
 
-    dish.name = name;
-    dish.description = description;
-    dish.price = price;
-    dish.image_url = image_url
+    dishId.name = name;
+    dishId.description = description;
+    dishId.price = price;
+    dishId.image_url = image_url
 
-    res.status(200).json({ data: dish })
+    res.status(200).json({ data: res.locals.dish })
 }
 
 
@@ -128,7 +120,7 @@ function list(req,res, next) {
 
 module.exports = {
     create: [validator, create],
-    read,
+    read: [dishExists, read],
     update: [dishExists, validator, update],
     list,
 }

@@ -52,18 +52,21 @@ function validators(req, res, next) {
   next();
 }
 
-//delete method validator
-// function isPending(req, res, next) {
-//     const { data: status } = req.body;
+//ordersExist res.locals
+function ordersExists(req, res, next) {
+  const { orderId } = req.params;
+  const order = orders.find((o) => o.id === orderId);
+  
+  if (!order) {
+    return next({
+      message: "order was not found",
+      status: 404,
+    });
+}
+res.locals.order = order;
+next();
+}
 
-//     if (!status || status !== "pending") {
-//         return next({
-//             message:"An order cannot be deleted unless it is pending.",
-//             status: 400
-//         })
-//     }
-//     next();
-// }
 
 //update method validator
 function updateValidator(req, res, next) {
@@ -83,6 +86,8 @@ function updateValidator(req, res, next) {
   }
   next();
 }
+
+
 
 // create orders handler
 function create(req, res, next) {
@@ -109,36 +114,18 @@ function list(req, res, next) {
 
 //read single order handler
 function read(req, res, next) {
-  const { orderId } = req.params;
-  const order = orders.find((o) => o.id === orderId);
-
-  if (!order) {
-    return next({
-      message: "order was not found",
-      status: 404,
-    });
-  }
-  res.status(200).json({ data: order });
+  res.status(200).json({ data: res.locals.order });
 }
 
 //update single order handler
 function update(req, res, next) {
-  const { orderId } = req.params;
-  const order = orders.find((o) => o.id === orderId);
-
+  const { order } = res.locals;
   const { data: { id, deliverTo, mobileNumber, status, dishes } = {} } =
     req.body;
 
-  if (!order) {
+  if (id && id !== order.id) {
     return next({
-      message: "order was not found",
-      status: 404,
-    });
-  }
-
-  if (id && id !== orderId) {
-    return next({
-      message: `Order id does not match route id. Order: ${id}, Route: ${orderId}.`,
+      message: `Order id does not match route id. Order: ${id}, Route: ${order.id}.`,
       status: 400,
     });
   }
@@ -155,8 +142,9 @@ function update(req, res, next) {
   order.status = status;
   order.dishes = dishes;
 
-  res.status(200).json({ data: order });
+  res.status(200).json({ data: order});
 }
+
 //delete single order handler
 function destroy(req, res, next) {
   const { orderId } = req.params;
@@ -183,7 +171,7 @@ function destroy(req, res, next) {
 module.exports = {
   create: [validators, create],
   list,
-  read,
+  read: [ordersExists, read],
   destroy,
-  update: [validators, updateValidator, update],
+  update: [validators, updateValidator, ordersExists, update],
 };
