@@ -92,7 +92,7 @@ function read(req, res, next) {
 
 // Update Dishes Handler
 function update(req, res, next) {
-    const { dishId } = res.locals.dish
+    const dishId = res.locals.dish
     const { data: {id, name, description, price, image_url} = {} } = req.body;
 
     if (id && id !== dishId) {
