@@ -58,6 +58,7 @@ function dishExists (req, res, next) {
             status: 404
         })
     }
+    res.locals.dish = dish
     next();
 }
 
@@ -79,9 +80,7 @@ function create(req, res, next) {
 
 // Read Single Dishes Handler
 function read(req, res, next) {
-    const { dishId } = req.params;
-    const dish = dishes.find((d) => d.id === dishId)
-
+    const { dish } = res.locals;
     if (!dish) {
         return next({
             message: "Dish was not found",
@@ -93,9 +92,7 @@ function read(req, res, next) {
 
 // Update Dishes Handler
 function update(req, res, next) {
-    const { dishId } = req.params;
-    const dish = dishes.find((d) => d.id === dishId);
-
+    const { dishId } = res.locals.dish
     const { data: {id, name, description, price, image_url} = {} } = req.body;
 
     if (id && id !== dishId) {
