@@ -65,7 +65,8 @@ function dishExists (req, res, next) {
 
 // Create Dishes Handler
 function create(req, res, next) {
-    const { data: { name, description, price, image_url } } = {} = req.body;
+    // const { data: { name, description, price, image_url } } = {} = req.body;
+    const { data: { name, description, price, image_url } = {} } = req.body;
     const newDish = {
         id: nextId(),
         name,
@@ -93,9 +94,10 @@ function read(req, res, next) {
 // Update Dishes Handler
 function update(req, res, next) {
     const dishId = res.locals.dish
+    const {dish} = res.locals
     const { data: {id, name, description, price, image_url} = {} } = req.body;
 
-    if (id && id !== dishId) {
+    if (id && id !== dishId.id) {
         return next({
             message: `Dish id does not match route id. Dish: ${id}, Route: ${dishId}`,
             status: 400
